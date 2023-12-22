@@ -1,0 +1,6 @@
+root_file: gun-detect
+streamlit_resources:
+  log_file: logs/gun_det.log
+  database_file:
+
+
