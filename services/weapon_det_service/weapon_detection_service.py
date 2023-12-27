@@ -1,128 +1,112 @@
 import cv2 as cv
 import os
 from yolov7.detector import YoloV7Detector
-from services import logger
+from services import main_sys_logger, detection_logger
 
+class DetectionService:
 
-class CamDetection:
-
-    def __init__(self, model_path, cam_image_dir, output_images):
-        """
-
-        :param model_path:
-        :param cam_image_dir:
-        :param output_images:
-        """
+    def __init__(self, model_path, cam_image_dir, output_images, use_gpu=True):
         self.model_path = model_path
         self.cam_images_dir = cam_image_dir
-        self.output_image = output_images
+        self.output_images_dir = output_images
+        self.use_gpu = use_gpu
+        self.logger = main_sys_logger()
+        self.detection_logger = detection_logger()
 
-    def draw_bbox(self, bbox, image):
-        """
-
-        :param bbox:
-        :param image:
-        :return:
-        """
+    def draw_bounding_boxes(self, bounding_boxes, image):
         try:
-            dh, dw, _ = image.shape
-            for box in bbox:
-                x, y, w, h = box
-                x, y, w, h = int(x), int(y), int(w), int(h)
-                cv.rectangle(image, (x, y), (w, h), (0, 0, 255), 1)
-                logger.info("Bounding box drawn.")
+            for box in bounding_boxes:
+                x1, y1, x2, y2 = map(int, box.bbox)
+                cv.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 1)
+                self.logger.info(f"Bounding box drawn: {box}")
         except Exception as e:
-            logger.error(f"Error in draw_bbox: {e}")
+            self.logger.error(f"Error in draw_bounding_boxes: {e}")
         return image
 
-    def cam_image_detection(self, image_path, draw=True):
-        """
-
-        :param image_path:
-        :param draw:
-        :return:
-        """
+    def detect_and_save(self, image_path, output_path, draw=True, thresh=0.2):
         try:
             image_display = cv.imread(image_path)
-            yolov7_detector = YoloV7Detector(self.model_path)
-            model_prediction, conf, classes = yolov7_detector.detect(image_display)
+
+            detector = YoloV7Detector(self.model_path)
+            bounding_boxes = detector.detect(image_display, thresh=thresh)
 
             filename = os.path.basename(image_path)
             detection_time = os.path.splitext(filename)[0]
-            count = sum(1 for i in classes if i == 0)
+            object_count = sum(1 for box in bounding_boxes if box.confidence > 0)
 
-            if count > 0:
-                if draw:
-                    bbox_image = self.draw_bbox(model_prediction, image_display)
-                    filename = os.path.basename(image_path)
-                    filename = os.path.join(self.output_image, filename)
-                    cv.imwrite(filename, bbox_image)
+            detection_info = {
+                'image_name': filename,
+                'detection_time': detection_time,
+                'bounding_boxes': bounding_boxes,
+                'detected': object_count > 0
+            }
 
-                logger.info("Cam image detection started.")
+            if draw and object_count > 0:
+                bbox_image = self.draw_bounding_boxes(bounding_boxes, image_display)
+                cv.imwrite(output_path, bbox_image)
+                self.logger.info(f"Bounding boxes drawn and saved to {output_path}")
 
-                return detection_time, count
+            self.logger.info(f"Detection result: {detection_info}")
+            self.detection_logger.info(f"Detection result: {detection_info}")
+
+            return detection_info
         except Exception as e:
-            logger.error(f"Error in cam_image_detection: {e}")
+            self.logger.error(f"Error in detect_and_save: {e}")
 
-    def image_detection(self, input_image_path, draw=True):
+    def detect_in_webcam(self, draw=False, video_path=0):
         try:
-            image_display = cv.imread(input_image_path)
-            yolov7_detector = YoloV7Detector(self.model_path)
-            model_prediction, conf, classes = yolov7_detector.detect(image_display)
-            if draw:
-                bbox_image = self.draw_bbox(model_prediction, image_display)
-                filename = os.path.basename(input_image_path)
-                filename = os.path.join(self.output_image, filename)
-                cv.imwrite(filename, bbox_image)
-            logger.info("Image detection started.")
-
-        except Exception as e:
-            logger.error(f"Error in image_detection: {e}")
-
-    def webcam_detection(self, draw=False, video_path=0):
-        """
-
-        :param draw:
-        :param video_path:
-        :return:
-        """
-        try:
-            yolov7_detector = YoloV7Detector(self.model_path)
+            detector = YoloV7Detector(self.model_path, use_gpu=self.use_gpu)
 
             if video_path == 0:
                 cap = cv.VideoCapture(0)
-                logger.info("Webcam detection started.")
+                self.logger.info("Webcam detection started.")
             else:
                 cap = cv.VideoCapture(video_path)
-                logger.info("Video detection started.")
+                self.logger.info("Video detection started.")
 
             while True:
                 ret, frame = cap.read()
+
                 if not ret:
-                    logger.error('Error retrieving frames from webcam')
+                    self.logger.error('Error retrieving frames from webcam')
                     break
 
-                # Add debugging prints
                 try:
-                    results, conf, classes = yolov7_detector.detect(frame)
-                    logger.info(f"Results: {results}, Confidence: {conf}, Classes: {classes}")
+                    bounding_boxes = detector.detect(frame)
+                    detection_info = {
+                        'bounding_boxes': bounding_boxes,
+                        'detected': len(bounding_boxes) > 0
+                    }
+                    self.logger.info(f"Results: {detection_info}")
+                    self.detection_logger.info(f"Results: {detection_info}")
                 except Exception as detect_error:
-                    logger.error(f"Error in object detection: {detect_error}")
+                    self.logger.error(f"Error in object detection: {detect_error}")
                     break
 
-                if draw:
-                    frame = self.draw_bbox(results, frame)
+                if draw and len(bounding_boxes) > 0:
+                    frame = self.draw_bounding_boxes(bounding_boxes, frame)
+
                 cv.imshow("video", frame)
                 key = cv.waitKey(1) & 0xFF
                 if key == ord('q'):
                     cv.destroyAllWindows()
                     break
         except Exception as e:
-            logger.error(f"Error in webcam_detection: {e}")
-
+            self.logger.error(f"Error in detect_in_webcam: {e}")
 
 if __name__ == "__main__":
     # Example usage:
-    cam_detection = CamDetection(model_path='resources/models/yolov7.pt', cam_image_dir='images/cam_images',
-                                 output_images='detected_image')
-    cam_detection.webcam_detection(draw=True, video_path="images/videos/test.mp4")
+    detection_service = DetectionService(
+        model_path='resources/models/weapon_detector.pt',
+        cam_image_dir='images/cam_images',
+        output_images='images/detected_image',
+        use_gpu=True
+    )
+    input_image_path = "images/detected_image/img.png"
+    output_image_path = os.path.join(detection_service.output_images_dir, os.path.basename(input_image_path))
+    detection_service.detect_and_save(
+        image_path=input_image_path,
+        output_path=output_image_path,
+        draw=True,
+        thresh=0.2
+    )
