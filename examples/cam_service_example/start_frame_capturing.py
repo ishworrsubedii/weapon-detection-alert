@@ -3,10 +3,12 @@ import time
 from services.image_capture_ipcam.capture_main import FrameSaver
 from services import ipcam_logger, main_sys_logger
 
-FLAG_PATH = "resources/flag"  # Path to the stop flag file
+FLAG_PATH = "resources/flag"
 
-main_sys_logger = main_sys_logger()
 ipcam_logger = ipcam_logger()
+main_sys_logger = main_sys_logger()
+
+
 
 
 def create_stop_flag():
@@ -48,15 +50,16 @@ def update_stop_flag(value):
 
 
 if __name__ == "__main__":
-    source = 0  # for webcam
+    source = 'rtsp://192.168.1.106:3000/h264_opus.sdp'  # 0 for webcam, paste your ipcam link to extract from ipcam
     image_path_to_save = "images/cam_images"
     image_hash_threshold = 5
 
     try:
-        start_capture = FrameSaver(source, image_path_to_save, image_hash_threshold)
-        start_capture.start_stream()
         ipcam_logger.info(
             "*************************Image Capturing service has been started.*************************\n")
+
+        start_capture = FrameSaver(source, image_path_to_save, image_hash_threshold)
+        start_capture.start_stream()
 
         while True:
             time.sleep(10)
