@@ -1,3 +1,5 @@
+import os
+
 from services import ipcam_logger
 
 ipcam_logger = ipcam_logger()
@@ -9,6 +11,7 @@ def write_stop_flag():
         with open(STOP_FLAG_PATH, 'w') as flag_file:
             flag_file.write("True")
         ipcam_logger.info("Stop flag set.")
+        os.remove(STOP_FLAG_PATH)
     except Exception as e:
         ipcam_logger.error(f"Error setting stop flag: {e}")
 
