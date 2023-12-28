@@ -3,8 +3,8 @@ import os
 from yolov7.detector import YoloV7Detector
 from services import main_sys_logger, detection_logger
 
-class DetectionService:
 
+class DetectionService:
     def __init__(self, model_path, cam_image_dir, output_images, use_gpu=True):
         self.model_path = model_path
         self.cam_images_dir = cam_image_dir
@@ -23,7 +23,7 @@ class DetectionService:
             self.logger.error(f"Error in draw_bounding_boxes: {e}")
         return image
 
-    def detect_and_save(self, image_path, output_path, draw=True, thresh=0.2):
+    def image_det_save(self, image_path, output_path, draw=False, thresh=0.2):
         try:
             image_display = cv.imread(image_path)
 
@@ -43,11 +43,15 @@ class DetectionService:
 
             if draw and object_count > 0:
                 bbox_image = self.draw_bounding_boxes(bounding_boxes, image_display)
-                cv.imwrite(output_path, bbox_image)
-                self.logger.info(f"Bounding boxes drawn and saved to {output_path}")
+
+                output_filename = os.path.splitext(filename)[0] + "_detected.jpg"
+                output_full_path = os.path.join(output_path, output_filename)
+
+                cv.imwrite(output_full_path, bbox_image)
+                self.logger.info(f"Bounding boxes drawn and saved to {output_full_path}")
 
             self.logger.info(f"Detection result: {detection_info}")
-            self.detection_logger.info(f"Detection result: {detection_info}")
+            self.detection_logger.info(f"Detection result: {detection_info}\n")
 
             return detection_info
         except Exception as e:
@@ -55,7 +59,7 @@ class DetectionService:
 
     def detect_in_webcam(self, draw=False, video_path=0):
         try:
-            detector = YoloV7Detector(self.model_path, use_gpu=self.use_gpu)
+            detector = YoloV7Detector(self.model_path)
 
             if video_path == 0:
                 cap = cv.VideoCapture(0)
@@ -94,8 +98,8 @@ class DetectionService:
         except Exception as e:
             self.logger.error(f"Error in detect_in_webcam: {e}")
 
+
 if __name__ == "__main__":
-    # Example usage:
     detection_service = DetectionService(
         model_path='resources/models/weapon_detector.pt',
         cam_image_dir='images/cam_images',
@@ -104,7 +108,8 @@ if __name__ == "__main__":
     )
     input_image_path = "images/detected_image/img.png"
     output_image_path = os.path.join(detection_service.output_images_dir, os.path.basename(input_image_path))
-    detection_service.detect_and_save(
+
+    detection_service.image_det_save(
         image_path=input_image_path,
         output_path=output_image_path,
         draw=True,
