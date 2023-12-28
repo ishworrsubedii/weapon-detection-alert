@@ -1,20 +1,23 @@
 import os
-
 from services import ipcam_logger
 
-ipcam_logger = ipcam_logger()
-STOP_FLAG_PATH = "resources/flag"  # Path to the stop flag file
 
+class StopImageCaptureServiceExample:
+    def __init__(self, stop_flag_path):
+        self.stop_flag_path = stop_flag_path
+        self.logger = ipcam_logger()
 
-def write_stop_flag():
-    try:
-        with open(STOP_FLAG_PATH, 'w') as flag_file:
-            flag_file.write("True")
-        ipcam_logger.info("Stop flag set.")
-        os.remove(STOP_FLAG_PATH)
-    except Exception as e:
-        ipcam_logger.error(f"Error setting stop flag: {e}")
+    def stop_load_image_example(self):
+        try:
+            with open(self.stop_flag_path, 'w') as flag_file:
+                flag_file.write("True")
+            self.logger.info("Stop flag set.")
+            os.remove(self.stop_flag_path)
+        except Exception as e:
+            self.logger.error(f"Error setting stop flag: {e}")
 
 
 if __name__ == "__main__":
-    write_stop_flag()
+    STOP_FLAG_PATH = "resources/flag"
+    stop_load_image_example = StopImageCaptureServiceExample(STOP_FLAG_PATH)
+    stop_load_image_example.stop_example_ipcam_webcam()
