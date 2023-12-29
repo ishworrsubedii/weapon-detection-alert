@@ -52,7 +52,7 @@ class FrameSaver:
 
         try:
             previous_frame = None
-            while self.cap.isOpened() and self.thread_running:
+            while self.cap.isOpened():
                 success, frame = self.cap.read()
                 if success:
                     hash_diff = self.hashing_diff(previous_frame, frame)
@@ -72,3 +72,11 @@ class FrameSaver:
                 self.stop_stream()  # Attempt to stop stream gracefully
             except Exception as e:
                 self.ipcam_logger.exception(f"Failed to stop stream: {e}")
+
+
+if __name__ == '__main__':
+    source = 'rtsp://192.168.1.106:3000/h264_opus.sdp'
+    image_path_to_save = "images/cam_images"
+    image_hash_threshold = 5
+    image_capture_service = FrameSaver(source, image_path_to_save, image_hash_threshold)
+    image_capture_service.video_webcam_frame_extraction()
