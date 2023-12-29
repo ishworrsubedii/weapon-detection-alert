@@ -87,7 +87,7 @@ File structure of the project
 
 2. **Create and activate the Conda environment:**
     ```bash
-    conda create -n gun-detection python=3.10 -y
+    conda create -n weapon-detection python=3.10 -y
     conda activate gun-detection
     ```
 
@@ -98,7 +98,7 @@ File structure of the project
 
 4. **Perform Inference/Prediction:**
     ```bash
-    python3 inference.py
+    python3 main.py
     streamlit run streamlit_app.py
     ```
    - We have to run both programs for inference. py for fastapi post request and streamlit for UI for the prediction.
