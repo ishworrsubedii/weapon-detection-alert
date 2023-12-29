@@ -16,7 +16,7 @@ def start_ipcam():
     flag_path = "resources/flag"
     source = "rtsp://192.168.1.106:3000/h264_opus.sdp"
 
-    image_path_to_save = "images/detected_image"
+    image_path_to_save = "images/cam_images"
     image_hash_threshold = 5
     image_capture_start_example = StartImageCaptureServiceExample(flag_path, source, image_path_to_save,
                                                                   image_hash_threshold)
