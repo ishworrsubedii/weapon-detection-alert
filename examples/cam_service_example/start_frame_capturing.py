@@ -1,6 +1,6 @@
 import os
 import time
-from services.image_capture_ipcam.capture_main import FrameSaver
+from services.image_capture_service.capture_main import FrameSaver
 from services import ipcam_logger, main_sys_logger
 
 
