@@ -1,7 +1,7 @@
 import os
 import time
 
-from services.image_capture_ipcam.image_load_main import ImageLoadThreading
+from services.image_capture_service.image_load_main import ImageLoadThreading
 
 
 class StartImageLoadServiceExample:
