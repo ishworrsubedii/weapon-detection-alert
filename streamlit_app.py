@@ -19,14 +19,19 @@ def call_api(endpoint):
         return {"error": str(e)}
 
 
-def start_ipcam_server():
-    global ipcam_server_status
+def start_stop_server(start_message, already_running_message, not_running_message):
+    global ipcam_server_status, detection_service_status
     if not ipcam_server_status:
         result = call_api("start_ipcam_server")
         ipcam_server_status = True
-        return result
+        return {"message": start_message, "result": result}
     else:
-        return {"message": "Server is already running."}
+        return {"message": already_running_message}
+
+
+def start_ipcam_server():
+    return start_stop_server("IP Cam Server started.", "IP Cam Server is already running.",
+                             "IP Cam Server is not running.")["result"]
 
 
 def stop_ipcam_server():
@@ -34,19 +39,14 @@ def stop_ipcam_server():
     if ipcam_server_status:
         result = call_api("stop_ipcam_server")
         ipcam_server_status = False
-        return result
+        return {"message": "IP Cam Server stopped.", "result": result}
     else:
-        return {"message": "Server is not running."}
+        return {"message": "IP Cam Server is not running."}
 
 
 def start_detection_service():
-    global detection_service_status
-    if not detection_service_status:
-        result = call_api("start_detection_service")
-        detection_service_status = True
-        return result
-    else:
-        return {"message": "Service is already running."}
+    return start_stop_server("Detection Service started.", "Detection Service is already running.",
+                             "Detection Service is not running.")["result"]
 
 
 def stop_detection_service():
@@ -54,9 +54,9 @@ def stop_detection_service():
     if detection_service_status:
         result = call_api("stop_detection_service")
         detection_service_status = False
-        return result
+        return {"message": "Detection Service stopped.", "result": result}
     else:
-        return {"message": "Service is not running."}
+        return {"message": "Detection Service is not running."}
 
 
 def view_location():
@@ -86,12 +86,10 @@ def view_logs():
 def extract_info_from_filename(filename):
     # Example: "2023-12-29 19:59:30.jpg"
     parts = os.path.splitext(filename)[0].split()
-    parts2 = parts[0].split('/')
-    date = parts2[2]
-    time = parts[1]
-    image_name = filename
 
-    return date, time, image_name
+    date, time = parts[0], parts[1]
+
+    return date, time, filename
 
 
 def create_datatable(image_folder):
@@ -100,23 +98,28 @@ def create_datatable(image_folder):
     image_files = [file for file in os.listdir(image_folder) if
                    file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp'))]
 
-    data = {
-        "Date": [],
-        "Time": [],
-        "Image Path": [os.path.join(image_folder, img) for img in image_files]
-    }
+    data = {"Date": [], "Time": [], "ImageName": []}
 
     for img in image_files:
         date, time, image_name = extract_info_from_filename(img)
         data["Date"].append(date)
         data["Time"].append(time)
-        data["Image Name"].append(image_name)
+        data["ImageName"].append(image_name)
 
     df = pd.DataFrame(data)
+
+    # Convert Date and Time columns to datetime for sorting
+    df['DateTime'] = pd.to_datetime(df['Date'] + ' ' + df['Time'])
+
+    # Sort DataFrame by DateTime in descending order
+    df = df.sort_values(by='DateTime', ascending=False).drop('DateTime', axis=1)
+
     st.table(df)
 
 
 def main_streamlit():
+    global ipcam_server_status, detection_service_status
+
     image_folder = "images/cam_images"
     st.sidebar.header("Weapon Detection and Location Sharing Alert Systems")
 
@@ -136,8 +139,6 @@ def main_streamlit():
         if st.button('Refresh Datatable'):
             create_datatable(image_folder)
 
-        # create_datatable(image_folder)
-
     elif selected_option == "Detection Service":
         st.subheader("Detection Service")
         if st.button('Start Server'):
@@ -156,9 +157,6 @@ def main_streamlit():
     container.subheader("Service Status:")
     container.write(f"IP Cam Service: {'Running' if ipcam_server_status else 'Stopped'}")
     container.write(f"Detection Service: {'Running' if detection_service_status else 'Stopped'}")
-
-    # Delay to update the table and status every second
-    time.sleep(1)
 
 
 if __name__ == '__main__':
