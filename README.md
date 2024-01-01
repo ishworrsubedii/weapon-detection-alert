@@ -101,12 +101,14 @@ File structure of the project
     python3 main.py
     streamlit run streamlit_app.py
     ```
+   
    - We have to run both programs for inference. py for fastapi post request and streamlit for UI for the prediction.
 
 
 ### Docker
 ```commandline
 ```
+# Future Work
 
 # Recommendations
 Your recommendations are highly valuable, and I highly value your insights and suggestions to enhance this project! Feel free to propose new features, report bugs, or suggest improvements.
