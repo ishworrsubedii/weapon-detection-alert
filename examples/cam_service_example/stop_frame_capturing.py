@@ -7,12 +7,12 @@ class StopImageCaptureServiceExample:
         self.stop_flag_path = stop_flag_path
         self.logger = ipcam_logger()
 
-    def stop_load_image_example(self):
+    def stop_example_ipcam_webcam(self):
         try:
             with open(self.stop_flag_path, 'w') as flag_file:
                 flag_file.write("True")
             self.logger.info("Stop flag set.")
-            os.remove(self.stop_flag_path)
+            # os.remove(self.stop_flag_path)
         except Exception as e:
             self.logger.error(f"Error setting stop flag: {e}")
 
