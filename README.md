@@ -108,6 +108,8 @@ File structure of the project
 ### Docker
 ```commandline
 ```
+# 🔥Features
+# ⚠️ Limitations
 # Future Work
 
 # Recommendations
