@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi import HTTPException
 import uvicorn
 
-from examples.cam_service_example.start_frame_capturing import StartImageCaptureServiceExample
+from examples.cam_service_example.start_frame_capturing import ImageCaptureService
 from examples.cam_service_example.stop_frame_capturing import StopImageCaptureServiceExample
 from examples.image_load_service_example.start_image_load_example import StartImageLoadServiceExample
 from examples.image_load_service_example.stop_image_load_example import StopImageLoadServiceExample
@@ -18,7 +18,7 @@ def start_ipcam():
 
     image_path_to_save = "images/cam_images"
     image_hash_threshold = 5
-    image_capture_start_example = StartImageCaptureServiceExample(flag_path, source, image_path_to_save,
+    image_capture_start_example = ImageCaptureService(flag_path, source, image_path_to_save,
                                                                   image_hash_threshold)
     image_capture_start_example.start_service()
 
