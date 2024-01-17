@@ -30,7 +30,6 @@ class ImageCaptureService:
                     content = flag_file.read().strip()
                     return content.lower() == "true"
             else:
-                self.create_stop_flag()  # Create the stop flag file if it doesn't exist
                 return False
         except Exception as e:
             IPCAM_LOGGER.error(f"Error checking stop flag: {e}")
@@ -81,7 +80,7 @@ class ImageCaptureService:
 
 if __name__ == "__main__":
     FLAG_PATH = "resources/flag"
-    SOURCE = 'rtsp://192.168.1.106:3000/h264_opus.sdp'
+    SOURCE = 'rtsp://192.168.1.125:3000/h264_opus.sdp'
     IMAGE_PATH_TO_SAVE = "images/cam_images"
     IMAGE_HASH_THRESHOLD = 5
 
