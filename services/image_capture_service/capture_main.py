@@ -15,7 +15,6 @@ from services import main_sys_logger
 from services import ipcam_logger
 from utils.settings import get_frame_save_dir
 
-
 class FrameSaver:
     def __init__(self, source, image_path_to_save, image_hash_threshold):
         self.source = source
