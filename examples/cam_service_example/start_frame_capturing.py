@@ -85,4 +85,6 @@ if __name__ == "__main__":
     IMAGE_HASH_THRESHOLD = 5
 
     image_capture_service = ImageCaptureService(FLAG_PATH, SOURCE, IMAGE_PATH_TO_SAVE, IMAGE_HASH_THRESHOLD)
+    image_capture_service.create_stop_flag()
     image_capture_service.start_service()
+    time.sleep(1)
