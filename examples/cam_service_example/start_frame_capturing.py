@@ -80,7 +80,7 @@ class ImageCaptureService:
 
 if __name__ == "__main__":
     FLAG_PATH = "resources/flag"
-    SOURCE = 'rtsp://192.168.1.125:3000/h264_opus.sdp'
+    SOURCE = 'rtsp://192.168.18.10:3000/h264_opus.sdp'
     IMAGE_PATH_TO_SAVE = "images/cam_images"
     IMAGE_HASH_THRESHOLD = 5
 
