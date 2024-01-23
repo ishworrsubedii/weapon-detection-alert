@@ -1,13 +1,14 @@
 import os
+import sys
 import time
-
+import threading
 from services.image_capture_service.image_load_main import ImageLoadThreading
-
 
 class StartImageLoadServiceExample:
     def __init__(self, flag_path, image_path_img):
         self.flag_path = flag_path
         self.image_load_threading = ImageLoadThreading(image_path_img)
+        self.process_queue_thread = threading.Thread(target=self.process_queue)
 
     def create_start_flag(self):
         try:
@@ -30,12 +31,12 @@ class StartImageLoadServiceExample:
             if os.path.exists(self.flag_path):
                 os.remove(self.flag_path)
             with open(self.flag_path, 'w') as flag_file:
-                flag_file.write(str(value))  # Write the provided value to the flag file
+                flag_file.write(str(value))
         except Exception as e:
             print(f"Error updating start flag: {e}")
 
     def start_service(self):
-        self.create_start_flag()  # Moved this outside the loop to avoid unnecessary file creation
+        self.process_queue_thread.start()
 
         while True:
             flag_value = self.read_start_flag()
@@ -43,27 +44,33 @@ class StartImageLoadServiceExample:
                 if flag_value is not None:
                     if flag_value == 'false':
                         self.image_load_threading.start_load_image()
-                        # Now, you can call main.py to start the image loading thread
                     elif flag_value == 'true':
                         self.image_load_threading.stop_load_image()
                         break
-                        # Implement code to stop the image loading thread if needed
-                        # Example: subprocess.run(["python", "stop.py"])
                     else:
                         print("Stopping the service...")
-                        break
+                        sys.exit()
+
             except Exception as e:
                 print(f"Exception occurred: {e}")
                 break
-                # Implement code to stop the service if needed
-                # Example: subprocess.run(["python", "stop.py"])
 
-            time.sleep(5)
+            time.sleep(2)
 
+        self.process_queue_thread.join()
+
+    def process_queue(self):
+        while True:
+            if not self.image_load_threading.image_queue.empty():
+                image_path = self.image_load_threading.image_queue.get()
+                self.image_load_threading.process_image(image_path)
+            time.sleep(0.5)
 
 if __name__ == '__main__':
     FLAG_PATH = "resources/flag_load_image"
     IMAGE_PATH_IMG = "images/cam_images"
 
     image_capture_service = StartImageLoadServiceExample(FLAG_PATH, IMAGE_PATH_IMG)
+    image_capture_service.create_start_flag()
+
     image_capture_service.start_service()
