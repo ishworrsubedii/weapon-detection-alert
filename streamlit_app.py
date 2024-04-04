@@ -2,7 +2,9 @@ import os
 import requests
 import streamlit as st
 import pandas as pd
-import time
+import uvicorn
+
+from src.api.fast_api import app
 
 LOG_DIR = "logs"
 API_URL = "http://localhost:8000"
@@ -59,32 +61,7 @@ def stop_detection_service():
         return {"message": "Detection Service is not running."}
 
 
-def view_location():
-    st.write("Enter location information:")
-    location_info = st.text_input("Location:")
-
-    if st.button("View Location"):
-        st.write(f"Viewing Location: {location_info}")
-
-
-def view_logs():
-    log_files = [file for file in os.listdir(LOG_DIR) if file.endswith(".log")]
-
-    selected_log_file = st.selectbox("Select Log File", log_files)
-
-    file_path = os.path.join(LOG_DIR, selected_log_file)
-
-    try:
-        with open(file_path, 'r') as file:
-            file_contents = file.read()
-            st.write(f"### File Contents: {selected_log_file}")
-            st.code(file_contents)
-    except FileNotFoundError:
-        st.error("File not found. Please select a valid log file.")
-
-
 def extract_info_from_filename(filename):
-    # Example: "2023-12-29 19:59:30.jpg"
     parts = os.path.splitext(filename)[0].split()
 
     date, time = parts[0], parts[1]
@@ -126,7 +103,7 @@ def main_streamlit():
     container = st.sidebar.empty()
 
     selected_option = st.sidebar.selectbox('Select an option',
-                                           ["IP Cam Service", "Detection Service", "View Location", "Logs"])
+                                           ["IP Cam Service", "Detection Service"])
 
     if selected_option == "IP Cam Service":
         st.subheader("IP Cam Service")
@@ -148,16 +125,11 @@ def main_streamlit():
             result = stop_detection_service()
             st.write(result)
 
-    elif selected_option == "View Location":
-        view_location()
-
-    elif selected_option == "Logs":
-        view_logs()
-
     container.subheader("Service Status:")
     container.write(f"IP Cam Service: {'Running' if ipcam_server_status else 'Stopped'}")
     container.write(f"Detection Service: {'Running' if detection_service_status else 'Stopped'}")
 
 
 if __name__ == '__main__':
+    uvicorn.run(app, host="localhost", port=8000)
     main_streamlit()

@@ -25,6 +25,6 @@ class AlertService:
             print(f"Error playing alert sound: {e}")
 
 
-# if __name__ == '__main__':
-#     alert_service = AlertService("resources/alert/alert.mp3")
-#     alert_service.play_alert()
+if __name__ == '__main__':
+    alert_service = AlertService("resources/alert/alert.mp3")
+    alert_service.play_alert()

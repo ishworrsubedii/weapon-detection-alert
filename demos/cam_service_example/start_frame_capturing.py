@@ -1,6 +1,6 @@
 import os
 import time
-from services.image_capture_service.capture_main import FrameSaver
+from src.services.image_capture_service.capture_main import FrameSaver
 
 
 class ImageCaptureService:

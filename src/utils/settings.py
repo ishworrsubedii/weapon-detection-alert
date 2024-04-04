@@ -5,7 +5,7 @@ Date: 2023-12-27
 """
 import os
 
-from services import main_sys_logger
+from src.services import main_sys_logger
 import cv2 as cv
 
 main_sys_logger = main_sys_logger()

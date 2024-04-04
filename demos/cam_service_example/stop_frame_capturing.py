@@ -6,6 +6,10 @@ class StopImageCaptureServiceExample:
         self.stop_flag_path = stop_flag_path
 
     def stop_example_ipcam_webcam(self):
+        """
+        Stop the image capturing service
+        :return:
+        """
         try:
             with open(self.stop_flag_path, 'w') as flag_file:
                 flag_file.write("True")

@@ -3,9 +3,7 @@ Created By: ishwor subedi
 Date: 2023-12-28
 """
 
-import os
-import os
-from services import ipcam_logger
+from src.services import ipcam_logger
 
 
 class StopImageLoadServiceExample:
@@ -14,6 +12,10 @@ class StopImageLoadServiceExample:
         self.logger = ipcam_logger()
 
     def stop_service(self):
+        """
+        Stop the image loading service
+        :return:
+        """
         try:
             with open(self.stop_flag_path, 'w') as flag_file:
                 flag_file.write("True")

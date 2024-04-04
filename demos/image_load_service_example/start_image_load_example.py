@@ -1,8 +1,7 @@
 import os
-import sys
 import time
-import threading
-from services.image_capture_service.image_load_main import ImageLoad
+
+from src.services.image_capture_service.image_load_main import ImageLoad
 
 
 class StartImageLoadExample:
@@ -14,6 +13,10 @@ class StartImageLoadExample:
         self.running = False
 
     def create_stop_flag(self):
+        """
+        Create a stop flag file
+        :return:
+        """
         try:
             with open(self.flag_path, 'w') as flag_file:
                 flag_file.write('False')
@@ -21,6 +24,10 @@ class StartImageLoadExample:
             print(f"Error creating stop flag: {e}")
 
     def check_stop_flag(self):
+        """
+        Check the stop flag
+        :return:
+        """
         try:
             if os.path.exists(self.flag_path):
                 with open(self.flag_path, 'r') as flag_file:
@@ -33,6 +40,11 @@ class StartImageLoadExample:
             return False
 
     def update_stop_flag(self, value):
+        """
+        Update the stop flag
+        :param value: value to update the stop flag
+        :return:
+        """
         try:
             with open(self.flag_path, 'w') as flag_file:
                 flag_file.write(str(value))
@@ -40,6 +52,10 @@ class StartImageLoadExample:
             print(f"Error updating stop flag: {e}")
 
     def start_service(self):
+        """
+        Start the image loading service
+        :return:
+        """
         try:
             self.running = True
             start_load = ImageLoad(self.image_dir, self.model_path)
@@ -70,6 +86,10 @@ class StartImageLoadExample:
                         "Issue encountered while stopping image loading services_trinetra in finally block.")
 
     def stop_service(self):
+        """
+        Stop the image loading service
+        :return:
+        """
         self.update_stop_flag("True")
 
 

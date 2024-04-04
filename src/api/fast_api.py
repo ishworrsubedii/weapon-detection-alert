@@ -2,24 +2,23 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi import HTTPException
 import uvicorn
-
-from examples.cam_service_example.start_frame_capturing import ImageCaptureService
-from examples.cam_service_example.stop_frame_capturing import StopImageCaptureServiceExample
-from examples.image_load_service_example.start_image_load_example import StartImageLoadServiceExample
-from examples.image_load_service_example.stop_image_load_example import StopImageLoadServiceExample
+from demos.cam_service_example.start_frame_capturing import ImageCaptureService
+from demos.cam_service_example.stop_frame_capturing import StopImageCaptureServiceExample
+from demos.image_load_service_example.start_image_load_example import StartImageLoadExample
+from demos.image_load_service_example.stop_image_load_example import StopImageLoadServiceExample
 
 app = FastAPI()
 
 
-# Helper functions
 def start_ipcam():
     flag_path = "resources/flag"
-    source = "rtsp://192.168.1.106:3000/h264_opus.sdp"
+
+    source = 'rtsp://ishwor:subedi@192.168.1.106:5555/h264_opus.sdp'
 
     image_path_to_save = "images/cam_images"
     image_hash_threshold = 5
     image_capture_start_example = ImageCaptureService(flag_path, source, image_path_to_save,
-                                                                  image_hash_threshold)
+                                                      image_hash_threshold)
     image_capture_start_example.start_service()
 
 
@@ -35,7 +34,7 @@ def start_detection():
 
     image_dir_path = "images/cam_images"
 
-    start_load_image_example = StartImageLoadServiceExample(flag_path, image_dir_path)
+    start_load_image_example = StartImageLoadExample(flag_path, image_dir_path, model_path="resources/model/v1/best.pt")
     start_load_image_example.start_service()
 
 
@@ -84,4 +83,4 @@ def stop_detection_service_api():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="localhost", port=8001)
