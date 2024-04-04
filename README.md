@@ -130,6 +130,13 @@ File structure of the project
 ### Docker
 
 ```commandline
+docker build -t myapp .
+```
+
+Then run the docker container
+
+```commandline
+docker myapp
 ```
 
 # 🔥Features
